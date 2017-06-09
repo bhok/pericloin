@@ -1,6 +1,6 @@
 # pericloin
 
-![text](https://user-images.githubusercontent.com/2636451/26962048-7cb3e4e0-4cb1-11e7-8caa-02d5d1c0361e.png)
+![text](https://user-images.githubusercontent.com/2636451/26962199-9d3a3524-4cb2-11e7-93a8-cfd2ff0ab4cc.png)
 
 Welcome to the Official Pericloin code repository.
 
