@@ -78,4 +78,4 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgments
 
-* This code was shamelessfuly copied by the bitcoin project
+* This code was shamelessfuly copied from the bitcoin project
