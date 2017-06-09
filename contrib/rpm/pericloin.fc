@@ -1,0 +1,8 @@
+/usr/bin/pericloin-cli		--	gen_context(system_u:object_r:pericloin_exec_t,s0)
+/usr/sbin/pericloind		--	gen_context(system_u:object_r:pericloin_exec_t,s0)
+/usr/lib(64)?/pericloin/pericloind		--	gen_context(system_u:object_r:pericloin_exec_t,s0)
+
+/etc/pericloin(/.*)?		gen_context(system_u:object_r:pericloin_conf_t,s0)
+/var/lib/pericloin(/.*)?		gen_context(system_u:object_r:pericloin_var_lib_t,s0)
+
+(/var)?/run/pericloind(/.*)?   gen_context(system_u:object_r:pericloin_var_run_t,s0)

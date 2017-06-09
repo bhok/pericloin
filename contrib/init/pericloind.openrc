@@ -1,0 +1,92 @@
+#!/sbin/runscript
+
+# backward compatibility for existing gentoo layout 
+#
+if [ -d "/var/lib/pericloin/.pericloin" ]; then
+	PERICLOIND_DEFAULT_DATADIR="/var/lib/pericloin/.pericloin"
+else
+	PERICLOIND_DEFAULT_DATADIR="/var/lib/pericloind"
+fi
+
+PERICLOIND_CONFIGFILE=${PERICLOIND_CONFIGFILE:-/etc/pericloin/pericloin.conf}
+PERICLOIND_PIDDIR=${PERICLOIND_PIDDIR:-/var/run/pericloind}
+PERICLOIND_PIDFILE=${PERICLOIND_PIDFILE:-${PERICLOIND_PIDDIR}/pericloind.pid}
+PERICLOIND_DATADIR=${PERICLOIND_DATADIR:-${PERICLOIND_DEFAULT_DATADIR}}
+PERICLOIND_USER=${PERICLOIND_USER:-${PERICLOIN_USER:-pericloin}}
+PERICLOIND_GROUP=${PERICLOIND_GROUP:-pericloin}
+PERICLOIND_BIN=${PERICLOIND_BIN:-/usr/bin/pericloind}
+PERICLOIND_NICE=${PERICLOIND_NICE:-${NICELEVEL:-0}}
+PERICLOIND_OPTS="${PERICLOIND_OPTS:-${PERICLOIN_OPTS}}"
+
+name="Pericloin Core Daemon"
+description="Pericloin cryptocurrency P2P network daemon"
+
+command="/usr/bin/pericloind"
+command_args="-pid=\"${PERICLOIND_PIDFILE}\" \
+		-conf=\"${PERICLOIND_CONFIGFILE}\" \
+		-datadir=\"${PERICLOIND_DATADIR}\" \
+		-daemon \
+		${PERICLOIND_OPTS}"
+
+required_files="${PERICLOIND_CONFIGFILE}"
+start_stop_daemon_args="-u ${PERICLOIND_USER} \
+			-N ${PERICLOIND_NICE} -w 2000"
+pidfile="${PERICLOIND_PIDFILE}"
+
+# The retry schedule to use when stopping the daemon. Could be either
+# a timeout in seconds or multiple signal/timeout pairs (like
+# "SIGKILL/180 SIGTERM/300")
+retry="${PERICLOIND_SIGTERM_TIMEOUT}"
+
+depend() {
+	need localmount net
+}
+
+# verify
+# 1) that the datadir exists and is writable (or create it)
+# 2) that a directory for the pid exists and is writable
+# 3) ownership and permissions on the config file
+start_pre() {
+	checkpath \
+	-d \
+	--mode 0750 \
+	--owner "${PERICLOIND_USER}:${PERICLOIND_GROUP}" \
+	"${PERICLOIND_DATADIR}"
+
+	checkpath \
+	-d \
+	--mode 0755 \
+	--owner "${PERICLOIND_USER}:${PERICLOIND_GROUP}" \
+	"${PERICLOIND_PIDDIR}"
+
+	checkpath -f \
+	-o ${PERICLOIND_USER}:${PERICLOIND_GROUP} \
+	-m 0660 \
+	${PERICLOIND_CONFIGFILE}
+
+	checkconfig || return 1
+}
+
+checkconfig()
+{
+	if ! grep -qs '^rpcpassword=' "${PERICLOIND_CONFIGFILE}" ; then
+		eerror ""
+		eerror "ERROR: You must set a secure rpcpassword to run pericloind."
+		eerror "The setting must appear in ${PERICLOIND_CONFIGFILE}"
+		eerror ""
+		eerror "This password is security critical to securing wallets "
+		eerror "and must not be the same as the rpcuser setting."
+		eerror "You can generate a suitable random password using the following"
+		eerror "command from the shell:"
+		eerror ""
+		eerror "bash -c 'tr -dc a-zA-Z0-9 < /dev/urandom | head -c32 && echo'"
+		eerror ""
+		eerror "It is also recommended that you also set alertnotify so you are "
+		eerror "notified of problems:"
+		eerror ""
+		eerror "ie: alertnotify=echo %%s | mail -s \"Pericloin Alert\"" \
+			"admin@foo.com"
+		eerror ""
+		return 1
+	fi
+}

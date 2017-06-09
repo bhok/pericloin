@@ -1,0 +1,33 @@
+# /etc/conf.d/pericloind: config file for /etc/init.d/pericloind
+
+# Config file location
+#PERICLOIND_CONFIGFILE="/etc/pericloin/pericloin.conf"
+
+# What directory to write pidfile to?  (created and owned by $PERICLOIND_USER)
+#PERICLOIND_PIDDIR="/var/run/pericloind"
+
+# What filename to give the pidfile
+#PERICLOIND_PIDFILE="${PERICLOIND_PIDDIR}/pericloind.pid"
+
+# Where to write pericloind data (be mindful that the blockchain is large)
+#PERICLOIND_DATADIR="/var/lib/pericloind"
+
+# User and group to own pericloind process
+#PERICLOIND_USER="pericloin"
+#PERICLOIND_GROUP="pericloin"
+
+# Path to pericloind executable
+#PERICLOIND_BIN="/usr/bin/pericloind"
+
+# Nice value to run pericloind under
+#PERICLOIND_NICE=0
+
+# Additional options (avoid -conf and -datadir, use flags above)
+PERICLOIND_OPTS="-disablewallet"
+
+# The timeout in seconds OpenRC will wait for pericloind to terminate
+# after a SIGTERM has been raised.
+# Note that this will be mapped as argument to start-stop-daemon's
+# '--retry' option, which means you can specify a retry schedule
+# here. For more information see man 8 start-stop-daemon.
+PERICLOIND_SIGTERM_TIMEOUT=60

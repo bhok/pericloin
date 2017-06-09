@@ -1,0 +1,81 @@
+policy_module(pericloin, 1.100.1)
+
+########################################
+#
+# Declarations
+#
+
+type pericloin_t;
+type pericloin_exec_t;
+init_daemon_domain(pericloin_t, pericloin_exec_t)
+
+permissive pericloin_t;
+
+type pericloin_initrc_exec_t;
+init_script_file(pericloin_initrc_exec_t)
+
+type pericloin_conf_t;
+files_type(pericloin_conf_t)
+
+type pericloin_var_lib_t;
+files_type(pericloin_var_lib_t)
+
+type pericloin_var_run_t;
+files_type(pericloin_var_run_t)
+
+type pericloin_port_t;
+corenet_port(pericloin_port_t)
+
+########################################
+#
+# pericloin local policy
+#
+allow pericloin_t self:process { fork };
+
+allow pericloin_t self:fifo_file rw_fifo_file_perms;
+allow pericloin_t self:unix_stream_socket create_stream_socket_perms;
+
+manage_dirs_pattern(pericloin_t, pericloin_conf_t, pericloin_conf_t)
+manage_files_pattern(pericloin_t, pericloin_conf_t, pericloin_conf_t)
+
+manage_dirs_pattern(pericloin_t, pericloin_var_lib_t, pericloin_var_lib_t)
+manage_files_pattern(pericloin_t, pericloin_var_lib_t, pericloin_var_lib_t)
+files_var_lib_filetrans(pericloin_t, pericloin_var_lib_t, { dir file })
+
+manage_dirs_pattern(pericloin_t, pericloin_var_run_t, pericloin_var_run_t)
+manage_files_pattern(pericloin_t, pericloin_var_run_t, pericloin_var_run_t)
+
+sysnet_dns_name_resolve(pericloin_t)
+corenet_all_recvfrom_unlabeled(pericloin_t)
+
+allow pericloin_t self:tcp_socket create_stream_socket_perms;
+corenet_tcp_sendrecv_generic_if(pericloin_t)
+corenet_tcp_sendrecv_generic_node(pericloin_t)
+corenet_tcp_sendrecv_all_ports(pericloin_t)
+corenet_tcp_bind_generic_node(pericloin_t)
+
+gen_require(`
+    type pericloin_port_t;
+')
+allow pericloin_t pericloin_port_t:tcp_socket name_bind;
+
+gen_require(`
+    type pericloin_port_t;
+')
+allow pericloin_t pericloin_port_t:tcp_socket name_connect;
+
+domain_use_interactive_fds(pericloin_t)
+
+files_read_etc_files(pericloin_t)
+
+miscfiles_read_localization(pericloin_t)
+
+sysnet_dns_name_resolve(pericloin_t)
+
+allow pericloin_t pericloin_exec_t:file execute_no_trans;
+allow pericloin_t self:process setsched;
+corecmd_exec_ls(pericloin_t)
+corenet_tcp_connect_http_port(pericloin_t)
+dev_read_urand(pericloin_t)
+fs_getattr_xattr_fs(pericloin_t)
+kernel_read_system_state(pericloin_t)
